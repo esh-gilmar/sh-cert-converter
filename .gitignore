@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.crt
+*.key
+*.pem
+*.zip
+tmp/
+temp/
+npm-debug.log*

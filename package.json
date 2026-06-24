@@ -1,0 +1,47 @@
+{
+  "name": "sh-cert-converter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web \"npm run dev --workspace @sh-cert-converter/api\" \"npm run dev --workspace @sh-cert-converter/web\"",
+    "build": "npm run build --workspace @sh-cert-converter/shared && npm run build --workspace @sh-cert-converter/api && npm run build --workspace @sh-cert-converter/web",
+    "test": "npm run test --workspace @sh-cert-converter/shared && npm run test --workspace @sh-cert-converter/api && npm run test --workspace @sh-cert-converter/web",
+    "lint": "npm run lint --workspace @sh-cert-converter/shared && npm run lint --workspace @sh-cert-converter/api && npm run lint --workspace @sh-cert-converter/web",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@adobe/css-tools": "^4.4.0",
+    "@babel/runtime": "^7.26.0",
+    "@testing-library/dom": "^10.4.0",
+    "ajv": "^8.17.1",
+    "aria-query": "^5.0.0",
+    "async": "^3.2.6",
+    "autoprefixer": "^10.4.20",
+    "caniuse-lite": "^1.0.30001690",
+    "chai": "^5.1.2",
+    "concurrently": "^9.1.2",
+    "css.escape": "^1.5.1",
+    "dom-accessibility-api": "^0.6.3",
+    "eslint": "^9.18.0",
+    "fast-json-stringify": "^6.0.1",
+    "jsdom": "^25.0.1",
+    "lodash": "^4.17.21",
+    "postcss": "^8.5.1",
+    "prettier": "^3.4.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "redent": "^3.0.0",
+    "readable-stream": "^4.7.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}

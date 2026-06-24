@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: development
+      API_PORT: 3001
+      MAX_UPLOAD_SIZE_MB: 10
+      OPENSSL_TIMEOUT_MS: 15000
+      OPENSSL_BIN: /usr/bin/openssl
+      TEMP_DIR: /tmp/pfx-converter
+    expose:
+      - "3001"
+    ports:
+      - "3001:3001"
+    networks:
+      - sh-cert-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      WEB_PORT: 3000
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - sh-cert-network
+
+networks:
+  sh-cert-network:
+    driver: bridge
