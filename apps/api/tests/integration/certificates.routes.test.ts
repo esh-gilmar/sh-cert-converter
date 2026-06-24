@@ -126,6 +126,13 @@ describe('certificate routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toContain('application/zip');
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(readGeneratedFilesHeader(response.headers['x-certificate-files'])).toEqual([
+      'certificate.crt',
+      'intermediate.crt',
+      'private.key'
+    ]);
+    expect(response.headers['x-certificate-has-intermediate']).toBe('true');
     expect(response.body.length).toBeGreaterThan(0);
     expect(listZipEntryNames(response.rawPayload)).toEqual(
       expect.arrayContaining(['certificate.crt', 'intermediate.crt', 'private.key'])
@@ -154,12 +161,26 @@ describe('certificate routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toContain('application/zip');
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(readGeneratedFilesHeader(response.headers['x-certificate-files'])).toEqual([
+      'certificate.crt',
+      'private.key'
+    ]);
+    expect(response.headers['x-certificate-has-intermediate']).toBe('false');
     expect(listZipEntryNames(response.rawPayload)).toEqual(
       expect.arrayContaining(['certificate.crt', 'private.key', 'README.txt'])
     );
     expect(listZipEntryNames(response.rawPayload)).not.toContain('intermediate.crt');
   });
 });
+
+function readGeneratedFilesHeader(headerValue: string | string[] | undefined) {
+  if (typeof headerValue !== 'string') {
+    return [];
+  }
+
+  return JSON.parse(decodeURIComponent(headerValue)) as string[];
+}
 
 function listZipEntryNames(zipBuffer: Buffer) {
   const names: string[] = [];

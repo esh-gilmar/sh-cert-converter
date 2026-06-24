@@ -1,4 +1,8 @@
 import archiver from 'archiver';
+import type {
+  CertificateConversionMetadata,
+  CertificateOutputFile
+} from '@sh-cert-converter/shared';
 import fs from 'fs';
 import { promises as fsp } from 'fs';
 import path from 'path';
@@ -39,10 +43,12 @@ export class CertificatesService {
 
       await normalizeExtractedFiles(files);
       await this.validateExtractedFiles(files);
+      const metadata = getConversionMetadata(files);
 
       return {
         zipBuffer: await createZipBuffer(files),
-        filename: sanitizeFilename('certificados-extraidos.zip')
+        filename: sanitizeFilename('certificados-extraidos.zip'),
+        metadata
       };
     } finally {
       await workspace.cleanup();
@@ -59,7 +65,25 @@ export class CertificatesService {
   }
 }
 
-async function assertReadableFile(pathToFile: string, code: 'CERTIFICATE_NOT_FOUND' | 'PRIVATE_KEY_NOT_FOUND') {
+function getConversionMetadata(files: ExtractedCertificateFiles): CertificateConversionMetadata {
+  const outputFiles: CertificateOutputFile[] = ['certificate.crt'];
+
+  if (files.intermediatePath) {
+    outputFiles.push('intermediate.crt');
+  }
+
+  outputFiles.push('private.key');
+
+  return {
+    files: outputFiles,
+    hasIntermediateCertificate: Boolean(files.intermediatePath)
+  };
+}
+
+async function assertReadableFile(
+  pathToFile: string,
+  code: 'CERTIFICATE_NOT_FOUND' | 'PRIVATE_KEY_NOT_FOUND'
+) {
   if (!(await isReadableFile(pathToFile))) {
     throw new CertificateError(code);
   }
@@ -72,9 +96,10 @@ async function isReadableFile(pathToFile: string) {
 }
 
 async function normalizeExtractedFiles(files: ExtractedCertificateFiles) {
-  await rewritePemFile(files.certificatePath, extractPemBlocks(await fsp.readFile(files.certificatePath, 'utf8'), [
-    'CERTIFICATE'
-  ]));
+  await rewritePemFile(
+    files.certificatePath,
+    extractPemBlocks(await fsp.readFile(files.certificatePath, 'utf8'), ['CERTIFICATE'])
+  );
 
   await rewritePemFile(
     files.privateKeyPath,

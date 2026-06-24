@@ -6,6 +6,11 @@ export const certificateOutputFiles = [
 
 export type CertificateOutputFile = (typeof certificateOutputFiles)[number];
 
+export interface CertificateConversionMetadata {
+  files: CertificateOutputFile[];
+  hasIntermediateCertificate: boolean;
+}
+
 export type CertificateErrorCode =
   | 'INVALID_FILE_TYPE'
   | 'FILE_TOO_LARGE'

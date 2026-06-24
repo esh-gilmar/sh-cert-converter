@@ -1,3 +1,5 @@
+import type { CertificateConversionMetadata } from '@sh-cert-converter/shared';
+
 export interface ConvertCertificateInput {
   fileBuffer: Buffer;
   originalFilename: string;
@@ -25,4 +27,5 @@ export interface CertificateExtractorPort {
 export interface ConvertedCertificateArchive {
   zipBuffer: Buffer;
   filename: string;
+  metadata: CertificateConversionMetadata;
 }

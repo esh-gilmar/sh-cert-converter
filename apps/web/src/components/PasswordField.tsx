@@ -20,13 +20,13 @@ export function PasswordField({ registration }: PasswordFieldProps) {
           id={inputId}
           type={visible ? 'text' : 'password'}
           autoComplete="off"
-          className="h-12 w-full rounded-md border border-slate-300 bg-white px-3 pr-12 text-slate-900 outline-none transition focus:border-sh-green focus:ring-2 focus:ring-sh-green/20"
+          className="h-12 w-full rounded-lg border border-slate-200 bg-white px-3 pr-12 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sh-green focus:ring-4 focus:ring-sh-green/15"
           placeholder="Opcional"
           {...registration}
         />
         <button
           type="button"
-          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-slate-600 hover:text-sh-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sh-orange"
+          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-lg text-slate-600 hover:text-sh-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sh-orange"
           onClick={() => setVisible((current) => !current)}
           aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
         >

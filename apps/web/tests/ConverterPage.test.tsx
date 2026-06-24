@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AppShell } from '../src/components/AppShell.js';
+import { appVersion, getCurrentYear } from '../src/config/appInfo.js';
 import { ConverterPage } from '../src/pages/ConverterPage.js';
 
 function renderPage() {
@@ -35,7 +37,9 @@ describe('ConverterPage', () => {
   it('renders the converter screen', () => {
     renderPage();
 
-    expect(screen.getByRole('heading', { name: 'Conversor de Certificado PFX' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Conversor de Certificado PFX' })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Converter certificado' })).toBeDisabled();
   });
 
@@ -70,13 +74,16 @@ describe('ConverterPage', () => {
     expect(password).toHaveAttribute('type', 'text');
   });
 
-  it('shows success after conversion', async () => {
+  it('shows generated files with intermediate certificate after conversion', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({
         ok: true,
         headers: new Headers({
-          'content-disposition': 'attachment; filename="certificados-extraidos.zip"'
+          'content-disposition': 'attachment; filename="certificados-extraidos.zip"',
+          'x-certificate-files': encodeURIComponent(
+            JSON.stringify(['certificate.crt', 'intermediate.crt', 'private.key'])
+          )
         }),
         blob: async () => new Blob(['zip'])
       }))
@@ -90,10 +97,91 @@ describe('ConverterPage', () => {
     await waitFor(() =>
       expect(screen.getByText('Certificado convertido com sucesso.')).toBeInTheDocument()
     );
+    const generatedFiles = within(screen.getByRole('list', { name: 'Arquivos gerados' }));
+    expect(generatedFiles.getByText('certificate.crt')).toBeInTheDocument();
+    expect(generatedFiles.getByText('intermediate.crt')).toBeInTheDocument();
+    expect(generatedFiles.getByText('private.key')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Baixar arquivos' })).toHaveAttribute(
       'href',
       'blob:download'
     );
+  });
+
+  it('does not show intermediate.crt as generated when the API omits it', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        headers: new Headers({
+          'content-disposition': 'attachment; filename="certificados-extraidos.zip"',
+          'x-certificate-files': encodeURIComponent(
+            JSON.stringify(['certificate.crt', 'private.key'])
+          )
+        }),
+        blob: async () => new Blob(['zip'])
+      }))
+    );
+    renderPage();
+    const file = new File(['content'], 'certificado.pfx', { type: 'application/octet-stream' });
+
+    await userEvent.upload(screen.getByLabelText('Arquivo PFX/P12'), file);
+    await userEvent.click(screen.getByRole('button', { name: 'Converter certificado' }));
+
+    await waitFor(() =>
+      expect(screen.getByText('Certificado convertido com sucesso.')).toBeInTheDocument()
+    );
+    const generatedFiles = within(screen.getByRole('list', { name: 'Arquivos gerados' }));
+    expect(generatedFiles.getByText('certificate.crt')).toBeInTheDocument();
+    expect(generatedFiles.getByText('private.key')).toBeInTheDocument();
+    expect(generatedFiles.queryByText('intermediate.crt')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('A cadeia intermediária não foi encontrada neste arquivo PFX.')
+    ).toBeInTheDocument();
+  });
+
+  it('clears conversion state when converting another certificate', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        headers: new Headers({
+          'content-disposition': 'attachment; filename="certificados-extraidos.zip"',
+          'x-certificate-files': encodeURIComponent(
+            JSON.stringify(['certificate.crt', 'private.key'])
+          )
+        }),
+        blob: async () => new Blob(['zip'])
+      }))
+    );
+    renderPage();
+    const file = new File(['content'], 'certificado.pfx', { type: 'application/octet-stream' });
+
+    await userEvent.upload(screen.getByLabelText('Arquivo PFX/P12'), file);
+    await userEvent.click(screen.getByRole('button', { name: 'Converter certificado' }));
+    await waitFor(() =>
+      expect(screen.getByText('Certificado convertido com sucesso.')).toBeInTheDocument()
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Converter outro certificado' }));
+
+    expect(screen.queryByText('Certificado convertido com sucesso.')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Converter certificado' })).toBeDisabled();
+  });
+
+  it('marks intermediate.crt as optional in the extraction card', () => {
+    renderPage();
+
+    expect(screen.getByText('intermediate.crt')).toBeInTheDocument();
+    expect(screen.getByText('Opcional')).toBeInTheDocument();
+    expect(
+      screen.getByText('Opcional — gerado quando existir cadeia no PFX/P12.')
+    ).toBeInTheDocument();
+  });
+
+  it('does not render the removed technical badge above the title', () => {
+    renderPage();
+
+    expect(screen.queryByText(/PFX\/P12 -> certificate\.crt/i)).not.toBeInTheDocument();
   });
 
   it('shows backend error message', async () => {
@@ -120,5 +208,21 @@ describe('ConverterPage', () => {
         screen.getByText('Não foi possível abrir o arquivo PFX. Verifique se a senha está correta.')
       ).toBeInTheDocument()
     );
+  });
+});
+
+describe('AppShell', () => {
+  it('renders the footer with current year and app version', () => {
+    render(
+      <AppShell>
+        <span>Conteúdo</span>
+      </AppShell>
+    );
+
+    expect(screen.getByText('Desenvolvido por')).toBeInTheDocument();
+    expect(screen.getByText('TI SH')).toBeInTheDocument();
+    expect(screen.getByText(String(getCurrentYear()))).toBeInTheDocument();
+    expect(screen.getByText(`v${appVersion}`)).toBeInTheDocument();
+    expect(screen.queryByText(/Não armazene certificados reais/i)).not.toBeInTheDocument();
   });
 });

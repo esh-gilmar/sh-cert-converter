@@ -72,6 +72,9 @@ export class CertificatesController {
     return reply
       .header('Content-Type', 'application/zip')
       .header('Content-Disposition', `attachment; filename="${archive.filename}"`)
+      .header('Cache-Control', 'no-store')
+      .header('X-Certificate-Files', encodeURIComponent(JSON.stringify(archive.metadata.files)))
+      .header('X-Certificate-Has-Intermediate', String(archive.metadata.hasIntermediateCertificate))
       .send(archive.zipBuffer);
   };
 }

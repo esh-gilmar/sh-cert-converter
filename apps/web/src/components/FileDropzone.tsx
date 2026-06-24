@@ -24,14 +24,16 @@ export function FileDropzone({ file, error, onFileChange }: FileDropzoneProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <label className="block text-sm font-semibold text-slate-800" htmlFor={inputId}>
         Arquivo PFX/P12
       </label>
       <div
-        className={`rounded-lg border-2 border-dashed bg-white p-5 transition ${
-          isDragging ? 'border-sh-orange bg-orange-50' : 'border-sh-teal/50'
-        } ${error ? 'border-red-300' : ''}`}
+        className={`rounded-[1.1rem] border-2 border-dashed p-3.5 shadow-sh-inset transition ${
+          isDragging
+            ? 'border-sh-orange bg-orange-50 shadow-sh-glow'
+            : 'border-sh-teal/50 bg-gradient-to-br from-white to-[#f8fbf6]'
+        } ${error ? 'border-red-300 bg-red-50/40' : ''}`}
         onDragEnter={(event) => {
           event.preventDefault();
           setIsDragging(true);
@@ -55,14 +57,14 @@ export function FileDropzone({ file, error, onFileChange }: FileDropzoneProps) {
         />
 
         {file ? (
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-sh-green/10 text-sh-green">
-                <FileArchive aria-hidden="true" size={22} />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sh-green/10 text-sh-green ring-1 ring-sh-green/10">
+                <FileArchive aria-hidden="true" size={21} />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-slate-900">{file.name}</p>
-                <p className="text-xs text-slate-600">{formatBytes(file.size)}</p>
+                <p className="text-xs font-medium text-slate-500">{formatBytes(file.size)}</p>
               </div>
             </div>
             <Button
@@ -82,11 +84,11 @@ export function FileDropzone({ file, error, onFileChange }: FileDropzoneProps) {
         ) : (
           <button
             type="button"
-            className="flex w-full flex-col items-center gap-3 rounded-md px-3 py-7 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sh-orange"
+            className="flex w-full flex-col items-center gap-2.5 rounded-xl px-3 py-4 text-center transition hover:bg-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sh-orange"
             onClick={() => inputRef.current?.click()}
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-md bg-sh-green text-white">
-              <Upload aria-hidden="true" size={24} />
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sh-green text-white shadow-sh-soft">
+              <Upload aria-hidden="true" size={22} />
             </span>
             <span className="text-base font-semibold text-sh-green">Selecionar arquivo</span>
             <span id={`${inputId}-hint`} className="text-sm text-slate-600">

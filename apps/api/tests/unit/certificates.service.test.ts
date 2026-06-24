@@ -40,6 +40,10 @@ describe('CertificatesService', () => {
     });
 
     expect(result.filename).toBe('certificados-extraidos.zip');
+    expect(result.metadata).toEqual({
+      files: ['certificate.crt', 'intermediate.crt', 'private.key'],
+      hasIntermediateCertificate: true
+    });
     expect(result.zipBuffer.length).toBeGreaterThan(0);
     const entries = readZipEntries(result.zipBuffer);
     expect(Object.keys(entries)).toEqual(
@@ -65,6 +69,10 @@ describe('CertificatesService', () => {
     });
 
     const entries = readZipEntries(result.zipBuffer);
+    expect(result.metadata).toEqual({
+      files: ['certificate.crt', 'private.key'],
+      hasIntermediateCertificate: false
+    });
     expect(Object.keys(entries)).toEqual(
       expect.arrayContaining(['certificate.crt', 'private.key', 'README.txt'])
     );
@@ -110,7 +118,12 @@ function readZipEntries(zipBuffer: Buffer) {
     const nameEnd = nameStart + nameLength;
     const name = zipBuffer.subarray(nameStart, nameEnd).toString('utf8');
 
-    entries[name] = readZipEntryContent(zipBuffer, localHeaderOffset, compressedSize, compressionMethod);
+    entries[name] = readZipEntryContent(
+      zipBuffer,
+      localHeaderOffset,
+      compressedSize,
+      compressionMethod
+    );
     offset = nameEnd + extraLength + commentLength - 1;
   }
 
