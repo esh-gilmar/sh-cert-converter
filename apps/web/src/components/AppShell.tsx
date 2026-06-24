@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           ].join(' ')}
         >
           <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-sh-orange via-sh-light to-transparent" />
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8">
+          <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-3 sm:px-8">
             <div className="flex items-center gap-3">
               <div
                 className={[
@@ -55,12 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut', delay: 0.04 }}
-          className="mx-auto w-full max-w-7xl flex-1 px-5 py-5 sm:px-8 sm:py-6"
+          className="mx-auto w-full max-w-[1440px] flex-1 px-5 py-5 sm:px-8 sm:py-6"
         >
           {children}
         </motion.main>
 
-        <footer className="mx-auto w-full max-w-7xl px-5 pb-6 text-xs text-slate-600 sm:px-8">
+        <footer className="mx-auto w-full max-w-[1440px] px-5 pb-6 text-xs text-slate-600 sm:px-8">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t border-emerald-900/10 pt-3 sm:justify-end">
             <span>Desenvolvido por</span>
             <span className="font-bold text-sh-orange">TI SH</span>

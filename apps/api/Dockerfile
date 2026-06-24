@@ -14,7 +14,8 @@ RUN npm run build --workspace @sh-cert-converter/shared
 RUN npm run build --workspace @sh-cert-converter/api
 
 FROM node:22-alpine AS runner
-RUN apk add --no-cache openssl
+RUN sed -i 's/https:/http:/g' /etc/apk/repositories \
+  && apk add --no-cache openssl
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
